@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyse de la phrase : "En ce mardi matin..."</title>
+  <style>
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f3f6fa;
+      color: #222;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a4b8c;
+      margin-bottom: 20px;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #0b5bd3;
+    }
+
+    .section {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .active {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    th {
+      background: #e8f0fe;
+      color: #1a4b8c;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .speaker {
+      cursor: pointer;
+      color: #1a73e8;
+      font-size: 20px;
+      margin-left: 6px;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Analyse de la phrase : "En ce mardi matin, nous commençons tous ensemble la Deuxième"</h1>
+
+  <nav>
+    <button onclick="showSection('en')">En</button>
+    <button onclick="showSection('ce')">Ce</button>
+    <button onclick="showSection('mardi')">Mardi</button>
+    <button onclick="showSection('matin')">Matin</button>
+    <button onclick="showSection('nous')">Nous</button>
+    <button onclick="showSection('commencons')">Commençons</button>
+    <button onclick="showSection('tous')">Tous</button>
+    <button onclick="showSection('ensemble')">Ensemble</button>
+    <button onclick="showSection('la')">La</button>
+    <button onclick="showSection('deuxieme')">Deuxième</button>
+  </nav>
+
+  <!-- Seções de explicação -->
+  <section id="en" class="section">
+    <h2>En <span class="speaker" onclick="speak('En')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Em, dentro de</td></tr>
+      <tr><th>Classe</th><td>Preposição</td></tr>
+      <tr><th>Como usar</th><td>Usa-se para indicar localização ou tempo. Ex: <em>en France</em> (na França), <em>en été</em> (no verão).</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Je vis en Espagne.</em> <span class="speaker" onclick="speak('Je vis en Espagne')">🔊</span><br>
+        <em>En hiver, il fait froid.</em> <span class="speaker" onclick="speak('En hiver, il fait froid')">🔊</span><br>
+        <em>Elle part en juin.</em> <span class="speaker" onclick="speak('Elle part en juin')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="ce" class="section">
+    <h2>Ce <span class="speaker" onclick="speak('Ce')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Este, essa, isso (dependendo do contexto)</td></tr>
+      <tr><th>Classe</th><td>Determinante demonstrativo</td></tr>
+      <tr><th>Como usar</th><td>Usa-se antes de substantivos masculinos para indicar algo próximo. Ex: <em>ce livre</em> (este livro).</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Ce jour est beau.</em> <span class="speaker" onclick="speak('Ce jour est beau')">🔊</span><br>
+        <em>Ce matin, il pleut.</em> <span class="speaker" onclick="speak('Ce matin, il pleut')">🔊</span><br>
+        <em>Ce garçon est gentil.</em> <span class="speaker" onclick="speak('Ce garçon est gentil')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="mardi" class="section">
+    <h2>Mardi <span class="speaker" onclick="speak('Mardi')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Terça-feira</td></tr>
+      <tr><th>Classe</th><td>Substantivo masculino</td></tr>
+      <tr><th>Sinônimos</th><td>(Não há, mas pertence à série: lundi, mardi, mercredi...)</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Nous sommes mardi.</em> <span class="speaker" onclick="speak('Nous sommes mardi')">🔊</span><br>
+        <em>Le mardi, je travaille tôt.</em> <span class="speaker" onclick="speak('Le mardi, je travaille tôt')">🔊</span><br>
+        <em>Mardi prochain, il partira.</em> <span class="speaker" onclick="speak('Mardi prochain, il partira')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="matin" class="section">
+    <h2>Matin <span class="speaker" onclick="speak('Matin')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Manhã</td></tr>
+      <tr><th>Classe</th><td>Substantivo masculino</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Le matin, je bois du café.</em> <span class="speaker" onclick="speak('Le matin, je bois du café')">🔊</span><br>
+        <em>Chaque matin, il court.</em> <span class="speaker" onclick="speak('Chaque matin, il court')">🔊</span><br>
+        <em>Ce matin, il fait beau.</em> <span class="speaker" onclick="speak('Ce matin, il fait beau')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="nous" class="section">
+    <h2>Nous <span class="speaker" onclick="speak('Nous')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Nós</td></tr>
+      <tr><th>Classe</th><td>Pronome pessoal sujeito</td></tr>
+      <tr><th>Como usar</th><td>Usado como sujeito da frase. Ex: <em>Nous parlons français</em>.</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Nous aimons lire.</em> <span class="speaker" onclick="speak('Nous aimons lire')">🔊</span><br>
+        <em>Nous habitons à Paris.</em> <span class="speaker" onclick="speak('Nous habitons à Paris')">🔊</span><br>
+        <em>Nous sommes heureux.</em> <span class="speaker" onclick="speak('Nous sommes heureux')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="commencons" class="section">
+    <h2>Commençons <span class="speaker" onclick="speak('Commençons')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Começamos</td></tr>
+      <tr><th>Classe</th><td>Verbo (1ª pessoa do plural do verbo <em>commencer</em>)</td></tr>
+      <tr><th>Verbos semelhantes</th><td>débute, entamer, initier</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Nous commençons le travail.</em> <span class="speaker" onclick="speak('Nous commençons le travail')">🔊</span><br>
+        <em>Commençons la leçon !</em> <span class="speaker" onclick="speak('Commençons la leçon !')">🔊</span><br>
+        <em>Ils commencent à parler.</em> <span class="speaker" onclick="speak('Ils commencent à parler')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="tous" class="section">
+    <h2>Tous <span class="speaker" onclick="speak('Tous')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Todos</td></tr>
+      <tr><th>Classe</th><td>Adjetivo indefinido / pronome</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Nous sommes tous ici.</em> <span class="speaker" onclick="speak('Nous sommes tous ici')">🔊</span><br>
+        <em>Tous les enfants jouent.</em> <span class="speaker" onclick="speak('Tous les enfants jouent')">🔊</span><br>
+        <em>Ils ont tous compris.</em> <span class="speaker" onclick="speak('Ils ont tous compris')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="ensemble" class="section">
+    <h2>Ensemble <span class="speaker" onclick="speak('Ensemble')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Juntos, em conjunto</td></tr>
+      <tr><th>Classe</th><td>Advérbio</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>Nous travaillons ensemble.</em> <span class="speaker" onclick="speak('Nous travaillons ensemble')">🔊</span><br>
+        <em>Ils vivent ensemble.</em> <span class="speaker" onclick="speak('Ils vivent ensemble')">🔊</span><br>
+        <em>Apprenons ensemble !</em> <span class="speaker" onclick="speak('Apprenons ensemble !')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="la" class="section">
+    <h2>La <span class="speaker" onclick="speak('La')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>A (artigo definido feminino)</td></tr>
+      <tr><th>Classe</th><td>Artigo definido</td></tr>
+      <tr><th>Como usar</th><td>Usado antes de substantivos femininos: <em>la maison</em>, <em>la table</em>.</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>La fille est gentille.</em> <span class="speaker" onclick="speak('La fille est gentille')">🔊</span><br>
+        <em>La porte est ouverte.</em> <span class="speaker" onclick="speak('La porte est ouverte')">🔊</span><br>
+        <em>La musique est belle.</em> <span class="speaker" onclick="speak('La musique est belle')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <section id="deuxieme" class="section">
+    <h2>Deuxième <span class="speaker" onclick="speak('Deuxième')">🔊</span></h2>
+    <table>
+      <tr><th>Significado</th><td>Segundo(a)</td></tr>
+      <tr><th>Classe</th><td>Adjetivo ordinal</td></tr>
+      <tr><th>Exemplos</th><td>
+        <em>La deuxième fois.</em> <span class="speaker" onclick="speak('La deuxième fois')">🔊</span><br>
+        <em>Il habite au deuxième étage.</em> <span class="speaker" onclick="speak('Il habite au deuxième étage')">🔊</span><br>
+        <em>C’est la deuxième leçon.</em> <span class="speaker" onclick="speak('C’est la deuxième leçon')">🔊</span>
+      </td></tr>
+    </table>
+  </section>
+
+  <script>
+    function showSection(id, updateHash = true) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      const section = document.getElementById(id);
+      if (section) {
+        section.classList.add('active');
+        if (updateHash) history.pushState(null, null, '#' + id);
+      }
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      speechSynthesis.speak(utterance);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) showSection(hash, false);
+      else showSection('en', false);
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.substring(1);
+      showSection(hash, false);
+    });
+  </script>
+
+</body>
+</html>
