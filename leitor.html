@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar Texto em Francês com Tradução Automática</title>
+    <style>
+        /* (Mantendo o mesmo CSS anterior para economizar espaço) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .text-input-container {
+            margin-bottom: 20px;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .load-text-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .load-text-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .text-content {
+            font-size: 20px;
+            margin-bottom: 20px;
+            user-select: text;
+            line-height: 1.8;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            position: relative;
+            cursor: text;
+        }
+        
+        .highlighted {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #ffeaa7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .highlighted:hover {
+            background-color: #ffeaa7;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .highlighted.saved-phrase {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .highlighted.saved-word {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .instructions {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            border: 1px solid;
+        }
+        
+        .legend-phrase {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .legend-word {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .floating-button {
+            position: fixed;
+            display: none;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .floating-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+        
+        .translation-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            max-width: 550px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-title {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.2s;
+        }
+        
+        .close-button:hover {
+            transform: scale(1.2);
+        }
+        
+        .modal-content {
+            padding: 20px;
+        }
+        
+        .full-translation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .translation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+        }
+        
+        .word-translations {
+            margin-top: 15px;
+        }
+        
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+            align-items: center;
+        }
+        
+        .word-item:last-child {
+            border-bottom: none;
+        }
+        
+        .original-word {
+            font-weight: bold;
+            color: #2c3e50;
+            flex: 1;
+        }
+        
+        .translated-word {
+            color: #27ae60;
+            flex: 1;
+        }
+        
+        .word-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #7f8c8d;
+            transition: all 0.2s;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        
+        .action-button:hover {
+            color: #3498db;
+            background-color: #f1f8ff;
+        }
+        
+        .phrase-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .language-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .language-info span {
+            background-color: #ecf0f1;
+            padding: 3px 10px;
+            border-radius: 15px;
+            margin: 0 5px;
+        }
+        
+        .debug-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #856404;
+        }
+        
+        .loading {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-style: italic;
+        }
+        
+        .link-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1002;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .link-modal h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .link-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .link-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .text-content {
+                font-size: 18px;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .word-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .word-actions {
+                margin-top: 5px;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Selecionar Texto em Francês com Tradução Automática</h1>
+    <p class="subtitle">Traduções em tempo real usando API do Google Translate</p>
+    
+    <div class="container">
+        <div class="text-input-container">
+            <h3>Cole seu texto em francês aqui:</h3>
+            <textarea class="text-input" id="textInput" placeholder="Cole aqui o texto em francês que você deseja trabalhar..."></textarea>
+            <button class="load-text-btn" id="loadTextBtn">Carregar Texto</button>
+        </div>
+        
+        <div class="text-content" id="textContent">
+            <!-- O texto será carregado aqui dinamicamente -->
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color legend-phrase"></div>
+                <span>Frases salvas</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-word"></div>
+                <span>Palavras salvas</span>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>Como usar:</strong> Cole seu texto em francês no campo acima e clique em "Carregar Texto". Depois, selecione qualquer palavra ou frase no texto. Um botão "Traduzir" aparecerá. Clique nele para ver a tradução completa e detalhada.</p>
+            <p><strong>Recursos:</strong> Use os ícones para ouvir a pronúncia, gerenciar salvamento no Anki ou gerenciar links.</p>
+            <p><strong>Salvamento:</strong> 💾 = Salvar no Anki | 💿 = Já salvo no Anki</p>
+            <p><strong>Links:</strong> 📚 = Link cadastrado (clique para abrir) | ⚓ = Cadastrar link</p>
+        </div>
+        
+        <div class="debug-info">
+            <p><strong>Recursos Adicionados:</strong></p>
+            <ul>
+                <li>🎧 Ícone de alto-falante para ouvir a pronúncia</li>
+                <li>💾 Ícone de disquete para salvar no Anki</li>
+                <li>💿 Ícone de CD para item já salvo no Anki</li>
+                <li>📚 Ícone de livro para abrir link cadastrado</li>
+                <li>⚓ Ícone de âncora para cadastrar novo link</li>
+                <li>📝 Salvamento diferenciado: frases → "frases", palavras → "palavras"</li>
+                <li>🟢 Destaque inteligente sem sobreposição</li>
+                <li>🌐 Tradução automática por API do Google Translate</li>
+                <li>🇫🇷 Campo para inserir texto em francês</li>
+            </ul>
+        </div>
+        
+        <div class="language-info">
+            <span>Francês</span> → <span>Português</span>
+        </div>
+    </div>
+    
+    <button class="floating-button" id="translateBtn">Traduzir</button>
+    
+    <div class="translation-modal" id="translationModal">
+        <div class="modal-header">
+            <div class="modal-title">Tradução Detalhada</div>
+            <button class="close-button" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-content">
+            <div class="full-translation">
+                <div class="translation-title">Tradução da Frase</div>
+                <div id="fullTranslationText"></div>
+                <div class="phrase-actions" id="phraseActions"></div>
+            </div>
+            
+            <div class="word-translations">
+                <div class="translation-title">Traduções Individuais</div>
+                <div id="wordTranslations"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="link-modal" id="linkModal">
+        <h3>Adicionar Link</h3>
+        <input type="text" class="link-input" id="linkInput" placeholder="Cole ou digite o link aqui">
+        <div class="link-buttons">
+            <button class="btn btn-secondary" id="cancelLinkBtn">Cancelar</button>
+            <button class="btn btn-primary" id="saveLinkBtn">Salvar</button>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        // Serviço de tradução usando API do Google Translate
+        class TranslationService {
+            constructor() {
+                this.cache = new Map();
+            }
+
+            // Método principal de tradução
+            async translateText(text, sourceLang = 'fr', targetLang = 'pt') {
+                // Verificar cache primeiro
+                const cacheKey = `${text}-${sourceLang}-${targetLang}`;
+                if (this.cache.has(cacheKey)) {
+                    return this.cache.get(cacheKey);
+                }
+
+                try {
+                    // Usar Google Translate API
+                    const translation = await this.translateWithGoogleAPI(text, sourceLang, targetLang);
+                    this.cache.set(cacheKey, translation);
+                    return translation;
+                    
+                } catch (error) {
+                    console.error('Erro na tradução:', error);
+                    // Fallback simples sem dicionário manual
+                    return `[Tradução indisponível: ${text}]`;
+                }
+            }
+
+            // Tradução usando Google Translate API (requer internet)
+            async translateWithGoogleAPI(text, sourceLang, targetLang) {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Falha na tradução');
+                }
+                
+                const data = await response.json();
+                return data[0][0][0];
+            }
+
+            // Traduzir múltiplas palavras de uma vez
+            async translateWords(words) {
+                const translations = {};
+                
+                for (const word of words) {
+                    if (!translations[word]) {
+                        translations[word] = await this.translateText(word);
+                    }
+                }
+                
+                return translations;
+            }
+        }
+
+        // Serviço de gerenciamento de links
+        class LinkService {
+            constructor() {
+                this.frasesLinksKey = 'frases_com_links';
+                this.palavrasLinksKey = 'palavras_com_links';
+            }
+
+            // Verificar se um item tem link cadastrado
+            hasLink(text, isPhrase) {
+                const storageKey = isPhrase ? this.frasesLinksKey : this.palavrasLinksKey;
+                const linksData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                return !!linksData[text];
+            }
+
+            // Obter link cadastrado
+            getLink(text, isPhrase) {
+                const storageKey = isPhrase ? this.frasesLinksKey : this.palavrasLinksKey;
+                const linksData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                return linksData[text];
+            }
+
+            // Salvar link
+            saveLink(text, link, isPhrase) {
+                const storageKey = isPhrase ? this.frasesLinksKey : this.palavrasLinksKey;
+                const linksData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                linksData[text] = link;
+                localStorage.setItem(storageKey, JSON.stringify(linksData));
+                return true;
+            }
+
+            // Abrir link em nova aba
+            openLink(text, isPhrase) {
+                const link = this.getLink(text, isPhrase);
+                if (link) {
+                    window.open(link, '_blank');
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // Serviço de gerenciamento do Anki
+        class AnkiService {
+            constructor() {
+                this.frasesKey = 'frases';
+                this.palavrasKey = 'palavras';
+            }
+
+            // Verificar se um item já está salvo no Anki
+            isSaved(text) {
+                const frases = JSON.parse(localStorage.getItem(this.frasesKey) || '[]');
+                const palavras = JSON.parse(localStorage.getItem(this.palavrasKey) || '[]');
+                
+                const allItems = [...frases, ...palavras];
+                return allItems.some(item => 
+                    item.texto.toLowerCase() === text.toLowerCase()
+                );
+            }
+
+            // Salvar item no Anki
+            async saveItem(text, type, translationService) {
+                const isPhrase = text.split(/\s+/).length > 1;
+                const storageKey = isPhrase ? this.frasesKey : this.palavrasKey;
+
+                // Verificar se já existe
+                if (this.isSaved(text)) {
+                    return { success: false, message: `"${text}" já está salvo no Anki!` };
+                }
+
+                // Obter tradução automática
+                let traducao = await translationService.translateText(text);
+
+                const item = {
+                    id: Date.now(),
+                    texto: text,
+                    traducao: traducao,
+                    tipo: isPhrase ? 'frase' : 'palavra',
+                    data: new Date().toISOString(),
+                    reviewData: {
+                        nextReview: new Date().toISOString().split('T')[0],
+                        interval: 1,
+                        ease: 2.5,
+                        reviews: 0
+                    }
+                };
+
+                const existingItems = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                existingItems.push(item);
+                localStorage.setItem(storageKey, JSON.stringify(existingItems));
+
+                return { success: true, message: `"${text}" salvo no Anki!` };
+            }
+
+            // Remover item do Anki
+            removeItem(text) {
+                const frases = JSON.parse(localStorage.getItem(this.frasesKey) || '[]');
+                const palavras = JSON.parse(localStorage.getItem(this.palavrasKey) || '[]');
+                
+                const updatedFrases = frases.filter(item => item.texto.toLowerCase() !== text.toLowerCase());
+                const updatedPalavras = palavras.filter(item => item.texto.toLowerCase() !== text.toLowerCase());
+                
+                localStorage.setItem(this.frasesKey, JSON.stringify(updatedFrases));
+                localStorage.setItem(this.palavrasKey, JSON.stringify(updatedPalavras));
+                
+                return { success: true, message: `"${text}" removido do Anki!` };
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const textInput = document.getElementById('textInput');
+            const loadTextBtn = document.getElementById('loadTextBtn');
+            const textContent = document.getElementById('textContent');
+            const translateBtn = document.getElementById('translateBtn');
+            const translationModal = document.getElementById('translationModal');
+            const closeModal = document.getElementById('closeModal');
+            const fullTranslationText = document.getElementById('fullTranslationText');
+            const wordTranslations = document.getElementById('wordTranslations');
+            const phraseActions = document.getElementById('phraseActions');
+            const overlay = document.getElementById('overlay');
+            const linkModal = document.getElementById('linkModal');
+            const linkInput = document.getElementById('linkInput');
+            const cancelLinkBtn = document.getElementById('cancelLinkBtn');
+            const saveLinkBtn = document.getElementById('saveLinkBtn');
+            
+            let selectedText = '';
+            let currentPhrase = '';
+            let currentType = '';
+            
+            // Inicializar serviços
+            const translationService = new TranslationService();
+            const linkService = new LinkService();
+            const ankiService = new AnkiService();
+            
+            // Carregar conteúdo salvo e destacar o texto
+            function loadAndHighlightText(textToHighlight) {
+                const frases = JSON.parse(localStorage.getItem('frases') || '[]');
+                const palavras = JSON.parse(localStorage.getItem('palavras') || '[]');
+                
+                let highlightedText = textToHighlight;
+                let fraseSpans = [];
+                
+                console.log('Frases salvas:', frases.map(f => f.texto));
+                console.log('Palavras salvas:', palavras.map(p => p.texto));
+                
+                // FASE 1: Destacar frases primeiro
+                frases.forEach(frase => {
+                    const textoFrase = frase.texto;
+                    if (textToHighlight.toLowerCase().includes(textoFrase.toLowerCase())) {
+                        const regex = new RegExp(escapeRegExp(textoFrase), 'gi');
+                        highlightedText = highlightedText.replace(regex, (match) => {
+                            const spanId = `frase-${frase.id}`;
+                            fraseSpans.push({
+                                id: spanId,
+                                text: match,
+                                start: highlightedText.indexOf(match),
+                                end: highlightedText.indexOf(match) + match.length
+                            });
+                            return `<span class="highlighted saved-phrase" id="${spanId}" title="Frase salva - Clique para ver detalhes" onclick="showSavedItem('${frase.id}')">${match}</span>`;
+                        });
+                    }
+                });
+                
+                // FASE 2: Destacar palavras individuais, exceto as que estão dentro de frases destacadas
+                palavras.forEach(palavra => {
+                    const textoPalavra = palavra.texto;
+                    const regex = new RegExp(`\\b${escapeRegExp(textoPalavra)}\\b`, 'gi');
+                    
+                    highlightedText = highlightedText.replace(regex, (match, offset) => {
+                        // Verificar se esta palavra está dentro de uma frase já destacada
+                        const isInsideFrase = fraseSpans.some(fraseSpan => 
+                            offset >= fraseSpan.start && offset <= fraseSpan.end
+                        );
+                        
+                        if (!isInsideFrase) {
+                            return `<span class="highlighted saved-word" title="Palavra salva - Clique para ver detalhes" onclick="showSavedItem('${palavra.id}')">${match}</span>`;
+                        }
+                        
+                        // Se está dentro de uma frase, manter o destaque da frase
+                        return match;
+                    });
+                });
+                
+                textContent.innerHTML = highlightedText;
+                console.log('Texto destacado:', highlightedText);
+            }
+            
+            // Função para escapar caracteres especiais em regex
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+            
+            // Função para mostrar item salvo
+            window.showSavedItem = function(id) {
+                const frases = JSON.parse(localStorage.getItem('frases') || '[]');
+                const palavras = JSON.parse(localStorage.getItem('palavras') || '[]');
+                
+                const item = [...frases, ...palavras].find(i => i.id == id);
+                if (item) {
+                    selectedText = item.texto;
+                    showTranslationModal();
+                }
+            };
+            
+            // Inicializar o texto com destaques
+            const initialFrenchText = "Bonjour, je m'appelle Pierre. J'habite à Paris. J'aime le café et les croissants. Comment allez-vous aujourd'hui?";
+            textInput.value = initialFrenchText;
+            loadAndHighlightText(initialFrenchText);
+            
+            // Evento para carregar o texto inserido pelo usuário
+            loadTextBtn.addEventListener('click', function() {
+                const userText = textInput.value.trim();
+                if (userText) {
+                    loadAndHighlightText(userText);
+                } else {
+                    alert('Por favor, insira um texto em francês para trabalhar.');
+                }
+            });
+            
+            // Função para mostrar o botão flutuante
+            function showFloatingButton(x, y) {
+                translateBtn.style.display = 'block';
+                translateBtn.style.left = (x - 60) + 'px';
+                translateBtn.style.top = (y - 50) + 'px';
+            }
+            
+            // Função para esconder o botão flutuante
+            function hideFloatingButton() {
+                translateBtn.style.display = 'none';
+            }
+            
+            // Função para criar botões de ação
+            function createActionButtons(text, type) {
+                const container = document.createElement('div');
+                container.className = type === 'phrase' ? 'phrase-actions' : 'word-actions';
+                
+                // Botão de áudio
+                const audioBtn = document.createElement('button');
+                audioBtn.className = 'action-button';
+                audioBtn.innerHTML = '🔊';
+                audioBtn.title = 'Ouvir pronúncia';
+                audioBtn.onclick = () => speakText(text);
+                
+                // Verificar se já está salvo no Anki
+                const isSaved = ankiService.isSaved(text);
+                
+                // Botão de salvamento condicional
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'action-button';
+                
+                if (isSaved) {
+                    // Ícone de CD para item já salvo
+                    saveBtn.innerHTML = '💿';
+                    saveBtn.title = 'Já salvo no Anki';
+                    saveBtn.onclick = () => {
+                        if (confirm(`"${text}" já está salvo no Anki. Deseja removê-lo?`)) {
+                            const result = ankiService.removeItem(text);
+                            alert(result.message);
+                            // Atualizar os botões
+                            showTranslationModal();
+                            loadAndHighlightText(textInput.value);
+                        }
+                    };
+                } else {
+                    // Ícone de disquete para salvar
+                    saveBtn.innerHTML = '💾';
+                    saveBtn.title = 'Salvar no Anki';
+                    saveBtn.onclick = () => saveToAnki(text, type);
+                }
+                
+                // Verificar se tem link cadastrado
+                const isPhrase = type === 'phrase';
+                const hasLink = linkService.hasLink(text, isPhrase);
+                
+                // Botão de link condicional
+                const linkBtn = document.createElement('button');
+                linkBtn.className = 'action-button';
+                
+                if (hasLink) {
+                    // Ícone de livro para link existente
+                    linkBtn.innerHTML = '📚';
+                    linkBtn.title = 'Abrir link cadastrado';
+                    linkBtn.onclick = () => linkService.openLink(text, isPhrase);
+                } else {
+                    // Ícone de âncora para cadastrar novo link
+                    linkBtn.innerHTML = '⚓';
+                    linkBtn.title = 'Cadastrar link';
+                    linkBtn.onclick = () => openLinkModal(text, type);
+                }
+                
+                container.appendChild(audioBtn);
+                container.appendChild(saveBtn);
+                container.appendChild(linkBtn);
+                
+                return container;
+            }
+            
+            // Função para usar a síntese de voz
+            function speakText(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'fr-FR';
+                    utterance.rate = 0.8;
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert('Seu navegador não suporta síntese de voz.');
+                }
+            }
+            
+            // Função para salvar no Anki
+            async function saveToAnki(text, type) {
+                const result = await ankiService.saveItem(text, type, translationService);
+                alert(result.message);
+                
+                if (result.success) {
+                    // Atualizar os destaques e botões
+                    loadAndHighlightText(textInput.value);
+                    showTranslationModal();
+                }
+            }
+            
+            // Função para abrir modal de link
+            function openLinkModal(text, type) {
+                currentPhrase = text;
+                currentType = type;
+                linkInput.value = '';
+                linkModal.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+            
+            // Função para salvar link
+            function saveLink() {
+                const link = linkInput.value.trim();
+                if (link) {
+                    const isPhrase = currentType === 'phrase';
+                    
+                    if (linkService.saveLink(currentPhrase, link, isPhrase)) {
+                        alert(`Link salvo para "${currentPhrase}"!`);
+                        closeLinkModal();
+                        
+                        // Atualizar os botões de ação para refletir o novo link
+                        if (selectedText === currentPhrase) {
+                            showTranslationModal();
+                        }
+                    }
+                } else {
+                    alert('Por favor, insira um link válido.');
+                }
+            }
+            
+            // Função para fechar modal de link
+            function closeLinkModal() {
+                linkModal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+            
+            // Função para mostrar o modal de tradução
+            async function showTranslationModal() {
+                // Limpar traduções anteriores
+                fullTranslationText.innerHTML = '<div class="loading">Carregando tradução...</div>';
+                wordTranslations.innerHTML = '<div class="loading">Carregando traduções individuais...</div>';
+                phraseActions.innerHTML = '';
+                
+                // Obter o texto selecionado
+                const selected = selectedText.trim();
+                
+                // Verificar se é uma única palavra
+                const isSingleWord = selected.split(/\s+/).length === 1;
+                
+                try {
+                    if (isSingleWord) {
+                        // Traduzir palavra única
+                        const translation = await translationService.translateText(selected);
+                        
+                        fullTranslationText.innerHTML = `
+                            <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>"${selected}"</strong> → "${translation}"
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Adicionar botões de ação para a palavra
+                        const actionButtons = createActionButtons(selected, 'word');
+                        phraseActions.appendChild(actionButtons);
+                        
+                        // Para palavra única, não mostrar traduções individuais
+                        wordTranslations.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 10px;">(Palavra única selecionada)</div>';
+                    } else {
+                        // Para frases, mostrar tradução completa e palavras individuais
+                        const phraseTranslation = await translationService.translateText(selected);
+                        
+                        fullTranslationText.innerHTML = `
+                            <div style="margin-bottom: 8px;">
+                                <strong>"${selected}"</strong> → "${phraseTranslation}"
+                            </div>
+                        `;
+                        
+                        // Adicionar botões de ação para a frase
+                        const actionButtons = createActionButtons(selected, 'phrase');
+                        phraseActions.appendChild(actionButtons);
+                        
+                        // Mostrar traduções individuais das palavras
+                        const words = selected.split(/\s+/);
+                        const wordTranslationsMap = await translationService.translateWords(words);
+                        
+                        wordTranslations.innerHTML = '';
+                        words.forEach(word => {
+                            const translation = wordTranslationsMap[word] || '(tradução não disponível)';
+                            
+                            const wordElement = document.createElement('div');
+                            wordElement.className = 'word-item';
+                            
+                            const wordContent = document.createElement('div');
+                            wordContent.style.display = 'flex';
+                            wordContent.style.justifyContent = 'space-between';
+                            wordContent.style.alignItems = 'center';
+                            wordContent.style.width = '100%';
+                            
+                            const textContent = document.createElement('div');
+                            textContent.style.display = 'flex';
+                            textContent.style.flex = '1';
+                            textContent.style.justifyContent = 'space-between';
+                            
+                            const originalSpan = document.createElement('span');
+                            originalSpan.className = 'original-word';
+                            originalSpan.textContent = word;
+                            
+                            const translatedSpan = document.createElement('span');
+                            translatedSpan.className = 'translated-word';
+                            translatedSpan.textContent = translation;
+                            
+                            textContent.appendChild(originalSpan);
+                            textContent.appendChild(translatedSpan);
+                            
+                            const actions = createActionButtons(word, 'word');
+                            
+                            wordContent.appendChild(textContent);
+                            wordContent.appendChild(actions);
+                            
+                            wordElement.appendChild(wordContent);
+                            wordTranslations.appendChild(wordElement);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar traduções:', error);
+                    fullTranslationText.innerHTML = '<div class="error">Erro ao carregar tradução. Tente novamente.</div>';
+                    wordTranslations.innerHTML = '<div class="error">Erro ao carregar traduções individuais.</div>';
+                }
+                
+                translationModal.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+            
+            // Função para fechar o modal de tradução
+            function closeTranslationModal() {
+                translationModal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+            
+            // Evento de seleção de texto - CORRIGIDO
+            textContent.addEventListener('mouseup', function(e) {
+                // Permitir seleção mesmo em elementos destacados
+                selectedText = window.getSelection().toString().trim();
+                
+                if (selectedText.length > 0) {
+                    showFloatingButton(e.pageX, e.pageY);
+                } else {
+                    hideFloatingButton();
+                }
+            });
+            
+            // Evento de clique no botão de tradução
+            translateBtn.addEventListener('click', function() {
+                showTranslationModal();
+                hideFloatingButton();
+            });
+            
+            // Evento de fechar o modal
+            closeModal.addEventListener('click', closeTranslationModal);
+            overlay.addEventListener('click', closeTranslationModal);
+            
+            // Eventos do modal de link
+            cancelLinkBtn.addEventListener('click', closeLinkModal);
+            saveLinkBtn.addEventListener('click', saveLink);
+            
+            // Fechar modal com a tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeTranslationModal();
+                    closeLinkModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
