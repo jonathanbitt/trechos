@@ -475,7 +475,7 @@
     
     <div class="overlay" id="overlay"></div>
 
-    <script type="module">
+  <script type="module">
         // --- IMPORTS DO FIREBASE ---
         import { 
             initializeApp 
@@ -487,7 +487,8 @@
             collection,
             getDocs,
             addDoc,
-            deleteDoc
+            deleteDoc,
+            updateDoc
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- CONFIGURAÇÃO DO FIREBASE ---
@@ -575,37 +576,100 @@
 
         class LinkService {
             constructor() {
-                this.frasesLinksKey = 'frases_com_links';
-                this.palavrasLinksKey = 'palavras_com_links';
+                // Removido o uso do LocalStorage
             }
 
-            hasLink(text, isPhrase) {
-                const storageKey = isPhrase ? this.frasesLinksKey : this.palavrasLinksKey;
-                const linksData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-                return !!linksData[text];
+            async hasLink(text, isPhrase) {
+                try {
+                    const item = await this.findItemInFirebase(text);
+                    return !!(item && item.link);
+                } catch (error) {
+                    console.error("Erro ao verificar link:", error);
+                    return false;
+                }
             }
 
-            getLink(text, isPhrase) {
-                const storageKey = isPhrase ? this.frasesLinksKey : this.palavrasLinksKey;
-                const linksData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-                return linksData[text];
+            async getLink(text, isPhrase) {
+                try {
+                    const item = await this.findItemInFirebase(text);
+                    return item ? item.link : null;
+                } catch (error) {
+                    console.error("Erro ao obter link:", error);
+                    return null;
+                }
             }
 
-            saveLink(text, link, isPhrase) {
-                const storageKey = isPhrase ? this.frasesLinksKey : this.palavrasLinksKey;
-                const linksData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-                linksData[text] = link;
-                localStorage.setItem(storageKey, JSON.stringify(linksData));
-                return true;
+            async saveLink(text, link, isPhrase) {
+                try {
+                    const item = await this.findItemInFirebase(text);
+                    if (item) {
+                        // Atualizar o documento existente com o link
+                        const docRef = doc(db, item.collection, item.id);
+                        await updateDoc(docRef, {
+                            link: link
+                        });
+                        return true;
+                    } else {
+                        // Criar um novo item se não existir
+                        const collectionName = isPhrase ? "frases" : "palavras";
+                        const itemData = {
+                            texto: text,
+                            traducao: "",
+                            tipo: isPhrase ? 'frase' : 'palavra',
+                            data: new Date().toISOString(),
+                            link: link,
+                            reviewData: {
+                                nextReview: new Date().toISOString().split('T')[0],
+                                interval: 1,
+                                ease: 2.5,
+                                reviews: 0
+                            }
+                        };
+                        
+                        await addDoc(collection(db, collectionName), itemData);
+                        return true;
+                    }
+                } catch (error) {
+                    console.error("Erro ao salvar link no Firebase:", error);
+                    return false;
+                }
             }
 
-            openLink(text, isPhrase) {
-                const link = this.getLink(text, isPhrase);
+            async openLink(text, isPhrase) {
+                const link = await this.getLink(text, isPhrase);
                 if (link) {
                     window.open(link, '_blank');
                     return true;
                 }
                 return false;
+            }
+
+            async findItemInFirebase(text) {
+                try {
+                    const [frasesSnap, palavrasSnap] = await Promise.all([
+                        getDocs(collection(db, "frases")),
+                        getDocs(collection(db, "palavras"))
+                    ]);
+                    
+                    // Procurar nas frases
+                    for (const doc of frasesSnap.docs) {
+                        if (doc.data().texto.toLowerCase() === text.toLowerCase()) {
+                            return { ...doc.data(), id: doc.id, collection: "frases" };
+                        }
+                    }
+                    
+                    // Procurar nas palavras
+                    for (const doc of palavrasSnap.docs) {
+                        if (doc.data().texto.toLowerCase() === text.toLowerCase()) {
+                            return { ...doc.data(), id: doc.id, collection: "palavras" };
+                        }
+                    }
+                    
+                    return null;
+                } catch (error) {
+                    console.error("Erro ao buscar item no Firebase:", error);
+                    return null;
+                }
             }
         }
 
@@ -662,6 +726,7 @@
                         ease: 2.5,
                         reviews: 0
                     }
+                    // Note: link não é adicionado aqui, apenas quando o usuário especifica
                 };
 
                 try {
@@ -828,221 +893,221 @@
             }
         }
 
-// --- FUNÇÕES GLOBAIS ---
-window.showSavedItem = async function(id, tipo) {
-    try {
-        const docRef = doc(db, tipo === 'frase' ? "frases" : "palavras", id);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-            const item = docSnap.data();
-            // Usar a variável global selectedText
-            window.selectedText = item.texto;
-            // Chamar a função global showTranslationModal
-            if (window.showTranslationModal) {
-                window.showTranslationModal();
+        // --- FUNÇÕES GLOBAIS ---
+        window.showSavedItem = async function(id, tipo) {
+            try {
+                const docRef = doc(db, tipo === 'frase' ? "frases" : "palavras", id);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const item = docSnap.data();
+                    // Usar a variável global selectedText
+                    window.selectedText = item.texto;
+                    // Chamar a função global showTranslationModal
+                    if (window.showTranslationModal) {
+                        window.showTranslationModal();
+                    } else {
+                        console.error("showTranslationModal não está disponível");
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao carregar item:", error);
+            }
+        };
+
+        // Tornar a função showTranslationModal global
+        window.showTranslationModal = async function() {
+            const fullTranslationText = document.getElementById('fullTranslationText');
+            const wordTranslations = document.getElementById('wordTranslations');
+            const phraseActions = document.getElementById('phraseActions');
+            const translationModal = document.getElementById('translationModal');
+            const overlay = document.getElementById('overlay');
+            
+            fullTranslationText.innerHTML = '<div class="loading">Carregando tradução...</div>';
+            wordTranslations.innerHTML = '<div class="loading">Carregando traduções individuais...</div>';
+            phraseActions.innerHTML = '';
+            
+            const selected = window.selectedText.trim();
+            const isSingleWord = selected.split(/\s+/).length === 1;
+            
+            try {
+                const translationService = new TranslationService();
+                
+                if (isSingleWord) {
+                    const translation = await translationService.translateText(selected);
+                    
+                    fullTranslationText.innerHTML = `
+                        <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>"${selected}"</strong> → "${translation}"
+                            </div>
+                        </div>
+                    `;
+                    
+                    const actionButtons = await createGlobalActionButtons(selected, 'word');
+                    phraseActions.appendChild(actionButtons);
+                    
+                    wordTranslations.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 10px;">(Palavra única selecionada)</div>';
+                } else {
+                    const phraseTranslation = await translationService.translateText(selected);
+                    
+                    fullTranslationText.innerHTML = `
+                        <div style="margin-bottom: 8px;">
+                            <strong>"${selected}"</strong> → "${phraseTranslation}"
+                        </div>
+                    `;
+                    
+                    const actionButtons = await createGlobalActionButtons(selected, 'phrase');
+                    phraseActions.appendChild(actionButtons);
+                    
+                    const words = selected.split(/\s+/);
+                    const wordTranslationsMap = await translationService.translateWords(words);
+                    
+                    wordTranslations.innerHTML = '';
+                    for (const word of words) {
+                        const translation = wordTranslationsMap[word] || '(tradução não disponível)';
+                        
+                        const wordElement = document.createElement('div');
+                        wordElement.className = 'word-item';
+                        
+                        const wordContent = document.createElement('div');
+                        wordContent.style.display = 'flex';
+                        wordContent.style.justifyContent = 'space-between';
+                        wordContent.style.alignItems = 'center';
+                        wordContent.style.width = '100%';
+                        
+                        const textContent = document.createElement('div');
+                        textContent.style.display = 'flex';
+                        textContent.style.flex = '1';
+                        textContent.style.justifyContent = 'space-between';
+                        
+                        const originalSpan = document.createElement('span');
+                        originalSpan.className = 'original-word';
+                        originalSpan.textContent = word;
+                        
+                        const translatedSpan = document.createElement('span');
+                        translatedSpan.className = 'translated-word';
+                        translatedSpan.textContent = translation;
+                        
+                        textContent.appendChild(originalSpan);
+                        textContent.appendChild(translatedSpan);
+                        
+                        const actions = await createGlobalActionButtons(word, 'word');
+                        
+                        wordContent.appendChild(textContent);
+                        wordContent.appendChild(actions);
+                        
+                        wordElement.appendChild(wordContent);
+                        wordTranslations.appendChild(wordElement);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar traduções:', error);
+                fullTranslationText.innerHTML = '<div class="error">Erro ao carregar tradução. Tente novamente.</div>';
+                wordTranslations.innerHTML = '<div class="error">Erro ao carregar traduções individuais.</div>';
+            }
+            
+            translationModal.style.display = 'block';
+            overlay.style.display = 'block';
+        };
+
+        // Função global para criar botões de ação
+        async function createGlobalActionButtons(text, type) {
+            const container = document.createElement('div');
+            container.className = type === 'phrase' ? 'phrase-actions' : 'word-actions';
+            
+            const ankiService = new AnkiService();
+            const linkService = new LinkService();
+            
+            // Botão de áudio
+            const audioBtn = document.createElement('button');
+            audioBtn.className = 'action-button';
+            audioBtn.innerHTML = '🔊';
+            audioBtn.title = 'Ouvir pronúncia';
+            audioBtn.onclick = () => {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'fr-FR';
+                    utterance.rate = 0.8;
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert('Seu navegador não suporta síntese de voz.');
+                }
+            };
+            
+            // Verificar se já está salvo no Anki
+            const isSaved = await ankiService.isSaved(text);
+            
+            // Botão de salvamento condicional
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'action-button';
+            
+            if (isSaved) {
+                saveBtn.innerHTML = '💿';
+                saveBtn.title = 'Já salvo no Anki';
+                saveBtn.onclick = async () => {
+                    if (confirm(`"${text}" já está salvo no Anki. Deseja removê-lo?`)) {
+                        const result = await ankiService.removeItem(text);
+                        alert(result.message);
+                        window.showTranslationModal();
+                        // Recarregar os destaques
+                        if (window.loadAndHighlightText) {
+                            await window.loadAndHighlightText();
+                        }
+                    }
+                };
             } else {
-                console.error("showTranslationModal não está disponível");
+                saveBtn.innerHTML = '💾';
+                saveBtn.title = 'Salvar no Anki';
+                saveBtn.onclick = async () => {
+                    const translationService = new TranslationService();
+                    const result = await ankiService.saveItem(text, type, translationService);
+                    alert(result.message);
+                    
+                    if (result.success) {
+                        // Recarregar os destaques
+                        if (window.loadAndHighlightText) {
+                            await window.loadAndHighlightText();
+                        }
+                        window.showTranslationModal();
+                    }
+                };
             }
+            
+            const isPhrase = type === 'phrase';
+            const hasLink = await linkService.hasLink(text, isPhrase);
+            
+            const linkBtn = document.createElement('button');
+            linkBtn.className = 'action-button';
+            
+            if (hasLink) {
+                linkBtn.innerHTML = '📚';
+                linkBtn.title = 'Abrir link cadastrado';
+                linkBtn.onclick = () => linkService.openLink(text, isPhrase);
+            } else {
+                linkBtn.innerHTML = '⚓';
+                linkBtn.title = 'Cadastrar link';
+                linkBtn.onclick = () => {
+                    // Abrir modal de link
+                    const link = prompt(`Digite o link para "${text}":`);
+                    if (link) {
+                        linkService.saveLink(text, link, isPhrase);
+                        alert(`Link salvo para "${text}"!`);
+                        // Recriar os botões para refletir a mudança
+                        window.showTranslationModal();
+                    }
+                };
+            }
+            
+            container.appendChild(audioBtn);
+            container.appendChild(saveBtn);
+            container.appendChild(linkBtn);
+            
+            return container;
         }
-    } catch (error) {
-        console.error("Erro ao carregar item:", error);
-    }
-};
 
-// Tornar a função showTranslationModal global
-window.showTranslationModal = async function() {
-    const fullTranslationText = document.getElementById('fullTranslationText');
-    const wordTranslations = document.getElementById('wordTranslations');
-    const phraseActions = document.getElementById('phraseActions');
-    const translationModal = document.getElementById('translationModal');
-    const overlay = document.getElementById('overlay');
-    
-    fullTranslationText.innerHTML = '<div class="loading">Carregando tradução...</div>';
-    wordTranslations.innerHTML = '<div class="loading">Carregando traduções individuais...</div>';
-    phraseActions.innerHTML = '';
-    
-    const selected = window.selectedText.trim();
-    const isSingleWord = selected.split(/\s+/).length === 1;
-    
-    try {
-        const translationService = new TranslationService();
-        
-        if (isSingleWord) {
-            const translation = await translationService.translateText(selected);
-            
-            fullTranslationText.innerHTML = `
-                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>"${selected}"</strong> → "${translation}"
-                    </div>
-                </div>
-            `;
-            
-            const actionButtons = await createGlobalActionButtons(selected, 'word');
-            phraseActions.appendChild(actionButtons);
-            
-            wordTranslations.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 10px;">(Palavra única selecionada)</div>';
-        } else {
-            const phraseTranslation = await translationService.translateText(selected);
-            
-            fullTranslationText.innerHTML = `
-                <div style="margin-bottom: 8px;">
-                    <strong>"${selected}"</strong> → "${phraseTranslation}"
-                </div>
-            `;
-            
-            const actionButtons = await createGlobalActionButtons(selected, 'phrase');
-            phraseActions.appendChild(actionButtons);
-            
-            const words = selected.split(/\s+/);
-            const wordTranslationsMap = await translationService.translateWords(words);
-            
-            wordTranslations.innerHTML = '';
-            for (const word of words) {
-                const translation = wordTranslationsMap[word] || '(tradução não disponível)';
-                
-                const wordElement = document.createElement('div');
-                wordElement.className = 'word-item';
-                
-                const wordContent = document.createElement('div');
-                wordContent.style.display = 'flex';
-                wordContent.style.justifyContent = 'space-between';
-                wordContent.style.alignItems = 'center';
-                wordContent.style.width = '100%';
-                
-                const textContent = document.createElement('div');
-                textContent.style.display = 'flex';
-                textContent.style.flex = '1';
-                textContent.style.justifyContent = 'space-between';
-                
-                const originalSpan = document.createElement('span');
-                originalSpan.className = 'original-word';
-                originalSpan.textContent = word;
-                
-                const translatedSpan = document.createElement('span');
-                translatedSpan.className = 'translated-word';
-                translatedSpan.textContent = translation;
-                
-                textContent.appendChild(originalSpan);
-                textContent.appendChild(translatedSpan);
-                
-                const actions = await createGlobalActionButtons(word, 'word');
-                
-                wordContent.appendChild(textContent);
-                wordContent.appendChild(actions);
-                
-                wordElement.appendChild(wordContent);
-                wordTranslations.appendChild(wordElement);
-            }
-        }
-    } catch (error) {
-        console.error('Erro ao carregar traduções:', error);
-        fullTranslationText.innerHTML = '<div class="error">Erro ao carregar tradução. Tente novamente.</div>';
-        wordTranslations.innerHTML = '<div class="error">Erro ao carregar traduções individuais.</div>';
-    }
-    
-    translationModal.style.display = 'block';
-    overlay.style.display = 'block';
-};
-
-// Função global para criar botões de ação
-async function createGlobalActionButtons(text, type) {
-    const container = document.createElement('div');
-    container.className = type === 'phrase' ? 'phrase-actions' : 'word-actions';
-    
-    const ankiService = new AnkiService();
-    const linkService = new LinkService();
-    
-    // Botão de áudio
-    const audioBtn = document.createElement('button');
-    audioBtn.className = 'action-button';
-    audioBtn.innerHTML = '🔊';
-    audioBtn.title = 'Ouvir pronúncia';
-    audioBtn.onclick = () => {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fr-FR';
-            utterance.rate = 0.8;
-            window.speechSynthesis.speak(utterance);
-        } else {
-            alert('Seu navegador não suporta síntese de voz.');
-        }
-    };
-    
-    // Verificar se já está salvo no Anki
-    const isSaved = await ankiService.isSaved(text);
-    
-    // Botão de salvamento condicional
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'action-button';
-    
-    if (isSaved) {
-        saveBtn.innerHTML = '💿';
-        saveBtn.title = 'Já salvo no Anki';
-        saveBtn.onclick = async () => {
-            if (confirm(`"${text}" já está salvo no Anki. Deseja removê-lo?`)) {
-                const result = await ankiService.removeItem(text);
-                alert(result.message);
-                window.showTranslationModal();
-                // Recarregar os destaques
-                if (window.loadAndHighlightText) {
-                    await window.loadAndHighlightText();
-                }
-            }
-        };
-    } else {
-        saveBtn.innerHTML = '💾';
-        saveBtn.title = 'Salvar no Anki';
-        saveBtn.onclick = async () => {
-            const translationService = new TranslationService();
-            const result = await ankiService.saveItem(text, type, translationService);
-            alert(result.message);
-            
-            if (result.success) {
-                // Recarregar os destaques
-                if (window.loadAndHighlightText) {
-                    await window.loadAndHighlightText();
-                }
-                window.showTranslationModal();
-            }
-        };
-    }
-    
-    const isPhrase = type === 'phrase';
-    const hasLink = linkService.hasLink(text, isPhrase);
-    
-    const linkBtn = document.createElement('button');
-    linkBtn.className = 'action-button';
-    
-    if (hasLink) {
-        linkBtn.innerHTML = '📚';
-        linkBtn.title = 'Abrir link cadastrado';
-        linkBtn.onclick = () => linkService.openLink(text, isPhrase);
-    } else {
-        linkBtn.innerHTML = '⚓';
-        linkBtn.title = 'Cadastrar link';
-        linkBtn.onclick = () => {
-            // Abrir modal de link (implementação básica)
-            const link = prompt(`Digite o link para "${text}":`);
-            if (link) {
-                linkService.saveLink(text, link, isPhrase);
-                alert(`Link salvo para "${text}"!`);
-                // Recriar os botões para refletir a mudança
-                window.showTranslationModal();
-            }
-        };
-    }
-    
-    container.appendChild(audioBtn);
-    container.appendChild(saveBtn);
-    container.appendChild(linkBtn);
-    
-    return container;
-}
-
-// Tornar a função loadAndHighlightText global
-window.loadAndHighlightText = loadAndHighlightText;
+        // Tornar a função loadAndHighlightText global
+        window.loadAndHighlightText = loadAndHighlightText;
 
         // --- INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', function() {
@@ -1110,7 +1175,7 @@ window.loadAndHighlightText = loadAndHighlightText;
                 }
                 
                 const isPhrase = type === 'phrase';
-                const hasLink = linkService.hasLink(text, isPhrase);
+                const hasLink = await linkService.hasLink(text, isPhrase);
                 
                 const linkBtn = document.createElement('button');
                 linkBtn.className = 'action-button';
@@ -1161,12 +1226,12 @@ window.loadAndHighlightText = loadAndHighlightText;
                 overlay.style.display = 'block';
             }
             
-            function saveLink() {
+            async function saveLink() {
                 const link = linkInput.value.trim();
                 if (link) {
                     const isPhrase = currentType === 'phrase';
                     
-                    if (linkService.saveLink(currentPhrase, link, isPhrase)) {
+                    if (await linkService.saveLink(currentPhrase, link, isPhrase)) {
                         alert(`Link salvo para "${currentPhrase}"!`);
                         closeLinkModal();
                         
@@ -1277,24 +1342,61 @@ window.loadAndHighlightText = loadAndHighlightText;
             }
             
             // Event Listeners
-            document.addEventListener('mouseup', function(e) {
-                if (e.target.classList.contains('highlighted')) {
-                    return;
-                }
-                
-                selectedText = window.getSelection().toString().trim();
-                
-                if (selectedText.length > 0) {
-                    showFloatingButton(e.pageX, e.pageY);
-                } else {
-                    hideFloatingButton();
-                }
-            });
+        // Event Listeners - COM VERIFICAÇÃO DE SEGURANÇA
+        document.addEventListener('mouseup', function(e) {
+            if (e.target.classList.contains('highlighted')) {
+                return;
+            }
             
+            selectedText = window.getSelection().toString().trim();
+            
+            if (selectedText.length > 0) {
+                showFloatingButton(e.pageX, e.pageY);
+            } else {
+                hideFloatingButton();
+            }
+        });
+        
+        // Verificar se os elementos existem antes de adicionar event listeners
+        if (translateBtn) {
             translateBtn.addEventListener('click', function() {
                 showTranslationModal();
                 hideFloatingButton();
             });
+        } else {
+            console.error('Elemento translateBtn não encontrado');
+        }
+        
+        if (closeModal) {
+            closeModal.addEventListener('click', closeTranslationModal);
+        } else {
+            console.error('Elemento closeModal não encontrado');
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', closeTranslationModal);
+        } else {
+            console.error('Elemento overlay não encontrado');
+        }
+        
+        if (cancelLinkBtn) {
+            cancelLinkBtn.addEventListener('click', closeLinkModal);
+        } else {
+            console.error('Elemento cancelLinkBtn não encontrado');
+        }
+        
+        if (saveLinkBtn) {
+            saveLinkBtn.addEventListener('click', saveLink);
+        } else {
+            console.error('Elemento saveLinkBtn não encontrado');
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeTranslationModal();
+                closeLinkModal();
+            }
+        });
             
             closeModal.addEventListener('click', closeTranslationModal);
             overlay.addEventListener('click', closeTranslationModal);
