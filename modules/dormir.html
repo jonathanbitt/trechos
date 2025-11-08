@@ -1,0 +1,17 @@
+<section>
+  <h2>Verbe : Avoir — “Ter”</h2>
+  <p>Le verbe <b>avoir</b> exprime la possession et sert à former les temps composés.</p>
+  <ul>
+    <li>J’ai <button onclick="speech('j’ai')">🔊</button> — eu tenho</li>
+    <li>Tu as <button onclick="speech('tu as')">🔊</button> — tu tens</li>
+    <li>Il a <button onclick="speech('il a')">🔊</button> — ele tem</li>
+  </ul>
+</section>
+
+<script>
+function speech(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'fr-FR';
+  speechSynthesis.speak(utter);
+}
+</script>
