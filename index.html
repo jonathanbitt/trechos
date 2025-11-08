@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma Modular de Estudos</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: #f9fafb;
+    color: #1f2937;
+  }
+
+  header {
+    background: #2563eb;
+    color: white;
+    padding: 15px;
+    text-align: center;
+  }
+
+  header h1 {
+    margin: 0 0 10px;
+  }
+
+  .module-creator {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .module-creator input {
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    width: 200px;
+  }
+
+  .module-creator button {
+    background: white;
+    color: #2563eb;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    background: #1e3a8a;
+    flex-wrap: wrap;
+  }
+
+  nav button {
+    background: none;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  nav button:hover, nav button.active {
+    background: #3b82f6;
+  }
+
+  main {
+    padding: 20px;
+    min-height: 70vh;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  footer {
+    background: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    padding: 20px;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .add-resource-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+  }
+
+  .add-resource-btn:hover {
+    background: #059669;
+    transform: scale(1.1);
+  }
+
+  .resource-menu {
+    position: fixed;
+    bottom: 90px;
+    right: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    padding: 10px;
+    z-index: 99;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+  }
+
+  .resource-menu.active {
+    display: flex;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+    color: #374151;
+  }
+
+  .menu-item:hover {
+    background: #f3f4f6;
+  }
+
+  .menu-icon {
+    font-size: 1.2rem;
+  }
+
+  .input-area {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+
+  input[type="text"], input[type="file"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+  }
+
+  button.action {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  button.action:hover {
+    background: #1d4ed8;
+  }
+
+  .delete-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+
+  .delete-btn:hover {
+    background: #dc2626;
+  }
+
+  .edit-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+
+  .edit-btn:hover {
+    background: #d97706;
+  }
+
+  .video-container iframe {
+    width: 100%;
+    max-width: 560px;
+    height: 315px;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+
+  .pdf-container, .image-container {
+    margin-top: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .pdf-container iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+  }
+
+  .image-container img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .comments-container {
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  .comment {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 6px;
+    border-left: 4px solid #2563eb;
+    word-wrap: break-word;
+  }
+
+  .comment a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  .empty {
+    color: #9ca3af;
+    font-style: italic;
+  }
+
+  /* Modal para adicionar módulo */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal h3 {
+    margin-top: 0;
+    color: #1f2937;
+  }
+
+  .modal-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .modal-cancel {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .modal-cancel:hover {
+    background: #4b5563;
+  }
+
+  .modal-confirm {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .modal-confirm:hover {
+    background: #1d4ed8;
+  }
+
+  /* Área de página incorporada */
+  .embedded-page-container {
+    margin-top: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+  }
+
+  .embedded-page-header {
+    background: #f3f4f6;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .embedded-page-header h3 {
+    margin: 0;
+    color: #374151;
+    font-size: 1rem;
+  }
+
+  .embedded-page-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .embedded-page {
+    width: 100%;
+    height: 400px;
+    border: none;
+    background: white;
+  }
+
+  .embedded-page-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0 15px 15px;
+  }
+
+  .fullscreen-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+
+  .fullscreen-btn:hover {
+    background: #059669;
+  }
+
+  .page-resources {
+    padding: 15px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+
+  .resource-section {
+    margin-bottom: 20px;
+  }
+
+  .nested-page {
+    margin-left: 20px;
+    border-left: 3px solid #d1d5db;
+    padding-left: 15px;
+  }
+
+  .collapse-btn {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 5px;
+  }
+
+  .collapsed .page-resources {
+    display: none;
+  }
+
+  .local-page-indicator {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    margin-left: 10px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .section-header h3 {
+    margin: 0;
+    color: #374151;
+  }
+
+  .close-section {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px;
+  }
+
+  .close-section:hover {
+    color: #374151;
+  }
+
+  .file-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .file-upload-area:hover {
+    border-color: #2563eb;
+  }
+
+  .file-upload-area.dragover {
+    border-color: #2563eb;
+    background: #f0f9ff;
+  }
+
+  .upload-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .resource-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    position: relative;
+  }
+
+  .resource-card h4 {
+    margin: 0 0 10px 0;
+    color: #374151;
+    font-size: 0.9rem;
+  }
+
+  .resource-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📘 Sistema Modular de Estudos</h1>
+  <div class="module-creator">
+    <input type="text" id="newModuleName" placeholder="Novo módulo... ex: dormir">
+    <button onclick="openModuleModal()">Adicionar módulo</button>
+  </div>
+</header>
+
+<nav id="navBar">
+  <button onclick="loadModule('avoir')" id="btn-avoir">Avoir</button>
+  <button onclick="loadModule('etre')" id="btn-etre">Être</button>
+  <button onclick="loadModule('bonjour')" id="btn-bonjour">Bonjour</button>
+</nav>
+
+<main id="content">
+  <p>Selecione ou crie um módulo para começar o estudo.</p>
+</main>
+
+<footer id="main-footer">
+  <div id="videos-section" class="resource-section" style="display: none;">
+    <div class="section-header">
+      <h3>🎥 Vídeos do YouTube</h3>
+      <button class="close-section" onclick="closeSection('videos-section')">×</button>
+    </div>
+    <div class="input-area">
+      <input type="text" id="videoLink" placeholder="Cole o link do vídeo do YouTube...">
+      <button class="action" onclick="addVideo()">Adicionar</button>
+    </div>
+    <div id="videos"></div>
+  </div>
+
+  <div id="pdfs-section" class="resource-section" style="display: none;">
+    <div class="section-header">
+      <h3>📄 Arquivos PDF</h3>
+      <button class="close-section" onclick="closeSection('pdfs-section')">×</button>
+    </div>
+    <div class="input-area">
+      <input type="text" id="pdfLink" placeholder="Cole o link do PDF...">
+      <button class="action" onclick="addPdf()">Adicionar PDF por Link</button>
+    </div>
+    <div class="file-upload-area" id="pdfUploadArea">
+      <div class="upload-icon">📄</div>
+      <p>Arraste um PDF aqui ou clique para selecionar</p>
+      <input type="file" id="pdfFile" accept=".pdf" style="display: none;" onchange="handlePdfUpload(this.files)">
+    </div>
+    <div id="pdfs"></div>
+  </div>
+
+  <div id="images-section" class="resource-section" style="display: none;">
+    <div class="section-header">
+      <h3>🖼️ Imagens</h3>
+      <button class="close-section" onclick="closeSection('images-section')">×</button>
+    </div>
+    <div class="input-area">
+      <input type="text" id="imageLink" placeholder="Cole o link da imagem...">
+      <button class="action" onclick="addImage()">Adicionar Imagem por Link</button>
+    </div>
+    <div class="file-upload-area" id="imageUploadArea">
+      <div class="upload-icon">🖼️</div>
+      <p>Arraste uma imagem aqui ou clique para selecionar</p>
+      <input type="file" id="imageFile" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(this.files)">
+    </div>
+    <div id="images" class="resources-grid"></div>
+  </div>
+
+  <div id="comments-section" class="resource-section" style="display: none;">
+    <div class="section-header">
+      <h3>💬 Comentários e Links</h3>
+      <button class="close-section" onclick="closeSection('comments-section')">×</button>
+    </div>
+    <div class="input-area">
+      <input type="text" id="commentText" placeholder="Escreva um comentário ou cole um link...">
+      <button class="action" onclick="addComment()">Enviar</button>
+    </div>
+    <div id="comments" class="empty">Nenhum comentário ainda.</div>
+  </div>
+
+  <div id="pages-section" class="resource-section" style="display: none;">
+    <div class="section-header">
+      <h3>🌐 Páginas Incorporadas</h3>
+      <button class="close-section" onclick="closeSection('pages-section')">×</button>
+    </div>
+    <div class="input-area">
+      <input type="text" id="pageLink" placeholder="Nome da página (ex: etre.html)">
+      <button class="action" onclick="addEmbeddedPage()">Incorporar</button>
+    </div>
+    <div id="embedded-pages-container"></div>
+  </div>
+</footer>
+
+<!-- Botão de adicionar recursos -->
+<button class="add-resource-btn" onclick="toggleResourceMenu()">+</button>
+<div class="resource-menu" id="resourceMenu">
+  <button class="menu-item" onclick="openSection('videos-section')">
+    <span class="menu-icon">🎥</span>
+    <span>Adicionar Vídeo</span>
+  </button>
+  <button class="menu-item" onclick="openSection('pdfs-section')">
+    <span class="menu-icon">📄</span>
+    <span>Adicionar PDF</span>
+  </button>
+  <button class="menu-item" onclick="openSection('images-section')">
+    <span class="menu-icon">🖼️</span>
+    <span>Adicionar Imagem</span>
+  </button>
+  <button class="menu-item" onclick="openSection('comments-section')">
+    <span class="menu-icon">💬</span>
+    <span>Adicionar Comentário</span>
+  </button>
+  <button class="menu-item" onclick="openSection('pages-section')">
+    <span class="menu-icon">🌐</span>
+    <span>Incorporar Página</span>
+  </button>
+</div>
+
+<!-- Modal para adicionar módulo -->
+<div id="moduleModal" class="modal">
+  <div class="modal-content">
+    <h3>Adicionar Novo Módulo</h3>
+    <input type="text" id="modalModuleName" class="modal-input" placeholder="Nome do módulo...">
+    <input type="text" id="modalModuleLink" class="modal-input" placeholder="Nome da página (ex: etre.html)">
+    <div class="modal-buttons">
+      <button class="modal-cancel" onclick="closeModuleModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="addNewModule()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentModule = null;
+  let editingCommentIndex = -1;
+
+  // ----- Inicialização -----
+  function initializeUploadAreas() {
+    // Configurar área de upload de PDF
+    const pdfUploadArea = document.getElementById('pdfUploadArea');
+    pdfUploadArea.addEventListener('click', () => document.getElementById('pdfFile').click());
+    setupDragAndDrop(pdfUploadArea, 'pdfFile');
+
+    // Configurar área de upload de imagens
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    imageUploadArea.addEventListener('click', () => document.getElementById('imageFile').click());
+    setupDragAndDrop(imageUploadArea, 'imageFile');
+  }
+
+  function setupDragAndDrop(uploadArea, fileInputId) {
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (fileInputId === 'pdfFile') {
+        handlePdfUpload(files);
+      } else {
+        handleImageUpload(files);
+      }
+    });
+  }
+
+  // ----- Menu de Recursos -----
+  function toggleResourceMenu() {
+    const menu = document.getElementById('resourceMenu');
+    menu.classList.toggle('active');
+  }
+
+  function openSection(sectionId) {
+    // Fechar menu
+    document.getElementById('resourceMenu').classList.remove('active');
+    
+    // Mostrar seção
+    document.getElementById(sectionId).style.display = 'block';
+    
+    // Scroll para a seção
+    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function closeSection(sectionId) {
+    document.getElementById(sectionId).style.display = 'none';
+  }
+
+  // Fechar menu ao clicar fora
+  document.addEventListener('click', function(event) {
+    const menu = document.getElementById('resourceMenu');
+    const button = document.querySelector('.add-resource-btn');
+    
+    if (!menu.contains(event.target) && !button.contains(event.target)) {
+      menu.classList.remove('active');
+    }
+  });
+
+  // ----- Upload de Arquivos -----
+  function handlePdfUpload(files) {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    
+    const file = files[0];
+    if (!file) return;
+    
+    if (file.type !== 'application/pdf') {
+      alert('Por favor, selecione um arquivo PDF.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const pdfData = {
+        name: file.name,
+        data: e.target.result,
+        type: 'uploaded'
+      };
+
+      const key = `${currentModule}-pdfs`;
+      const savedPdfs = JSON.parse(localStorage.getItem(key)) || [];
+      savedPdfs.push(pdfData);
+      localStorage.setItem(key, JSON.stringify(savedPdfs));
+      
+      updateFooter();
+      closeSection('pdfs-section');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleImageUpload(files) {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        alert(`O arquivo ${file.name} não é uma imagem.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageData = {
+          name: file.name,
+          data: e.target.result,
+          type: 'uploaded'
+        };
+
+        const key = `${currentModule}-images`;
+        const savedImages = JSON.parse(localStorage.getItem(key)) || [];
+        savedImages.push(imageData);
+        localStorage.setItem(key, JSON.stringify(savedImages));
+        
+        updateFooter();
+        closeSection('images-section');
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ----- Gerenciar módulos -----
+  function openModuleModal() {
+    const input = document.getElementById('newModuleName');
+    const name = input.value.trim();
+    if (!name) return;
+    
+    document.getElementById('modalModuleName').value = name;
+    document.getElementById('modalModuleLink').value = '';
+    document.getElementById('moduleModal').style.display = 'flex';
+  }
+
+  function closeModuleModal() {
+    document.getElementById('moduleModal').style.display = 'none';
+    document.getElementById('newModuleName').value = '';
+  }
+
+  function addNewModule() {
+    const name = document.getElementById('modalModuleName').value.trim();
+    const pageName = document.getElementById('modalModuleLink').value.trim();
+    
+    if (!name) return;
+    
+    const navBar = document.getElementById('navBar');
+
+    // Verificar se já existe
+    if (document.getElementById(`btn-${name}`)) {
+      alert('Módulo já existe!');
+      return;
+    }
+
+    // Criar botão novo
+    const btn = document.createElement('button');
+    btn.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    btn.id = `btn-${name}`;
+    btn.onclick = () => loadModule(name);
+    navBar.appendChild(btn);
+
+    // Salvar no localStorage
+    const savedModules = JSON.parse(localStorage.getItem('modules')) || [];
+    const moduleData = {
+      name: name,
+      pageName: pageName
+    };
+    savedModules.push(moduleData);
+    localStorage.setItem('modules', JSON.stringify(savedModules));
+
+    // Salvar o conteúdo do módulo
+    if (pageName) {
+      localStorage.setItem(`module-${name}-content`, `<p>Conteúdo do módulo <b>${name}</b>.</p>`);
+    } else {
+      localStorage.setItem(`module-${name}-content`, `<p>Conteúdo do módulo <b>${name}</b>.</p>`);
+    }
+
+    closeModuleModal();
+    
+    // Carregar o novo módulo
+    loadModule(name);
+  }
+
+  function restoreModules() {
+    const saved = JSON.parse(localStorage.getItem('modules')) || [];
+    saved.forEach(moduleData => {
+      // Verificar se moduleData é válido
+      if (moduleData && moduleData.name) {
+        if (!document.getElementById(`btn-${moduleData.name}`)) {
+          const btn = document.createElement('button');
+          btn.textContent = moduleData.name.charAt(0).toUpperCase() + moduleData.name.slice(1);
+          btn.id = `btn-${moduleData.name}`;
+          btn.onclick = () => loadModule(moduleData.name);
+          document.getElementById('navBar').appendChild(btn);
+        }
+      }
+    });
+  }
+
+  // ----- Carregar módulo -----
+  async function loadModule(name) {
+    const content = document.getElementById('content');
+    content.style.opacity = 0;
+
+    try {
+      // Primeiro tenta carregar do localStorage
+      const savedContent = localStorage.getItem(`module-${name}-content`);
+      if (savedContent) {
+        content.innerHTML = savedContent;
+        currentModule = name;
+        updateFooter();
+        window.location.hash = name;
+        setActiveButton(name);
+        return;
+      }
+      
+      // Se não estiver no localStorage, tenta carregar do servidor
+      const response = await fetch(`modules/${name}.html`);
+      if (!response.ok) throw new Error('Erro ao carregar módulo.');
+      const html = await response.text();
+      content.innerHTML = html;
+      currentModule = name;
+      updateFooter();
+      window.location.hash = name;
+      setActiveButton(name);
+    } catch {
+      content.innerHTML = `<p style="color:red;">Erro: módulo <b>${name}</b> não encontrado.</p>`;
+    } finally {
+      setTimeout(() => (content.style.opacity = 1), 200);
+    }
+  }
+
+  function setActiveButton(name) {
+    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+    const active = document.getElementById(`btn-${name}`);
+    if (active) active.classList.add('active');
+  }
+
+  // ----- Rodapé: todos os recursos -----
+  function updateFooter() {
+    if (!currentModule) return;
+    
+    const savedVideos = JSON.parse(localStorage.getItem(`${currentModule}-videos`)) || [];
+    const savedPdfs = JSON.parse(localStorage.getItem(`${currentModule}-pdfs`)) || [];
+    const savedImages = JSON.parse(localStorage.getItem(`${currentModule}-images`)) || [];
+    const savedComments = JSON.parse(localStorage.getItem(`${currentModule}-comments`)) || [];
+    const savedPages = JSON.parse(localStorage.getItem(`${currentModule}-pages`)) || [];
+
+    // Renderizar vídeos
+    const videoContainer = document.getElementById('videos');
+    videoContainer.innerHTML = '';
+    savedVideos.forEach((link, i) => {
+      const embedLink = link
+        .replace('watch?v=', 'embed/')
+        .replace('youtu.be/', 'www.youtube.com/embed/');
+      videoContainer.innerHTML += `
+        <div class="video-container">
+          <iframe src="${embedLink}" frameborder="0" allowfullscreen></iframe>
+          <button class="delete-btn" onclick="deleteVideo(${i})">🗑️ Excluir</button>
+        </div>`;
+    });
+
+    // Renderizar PDFs
+    const pdfContainer = document.getElementById('pdfs');
+    pdfContainer.innerHTML = '';
+    savedPdfs.forEach((pdf, i) => {
+      if (pdf.type === 'link') {
+        pdfContainer.innerHTML += `
+          <div class="pdf-container">
+            <iframe src="${pdf.url}"></iframe>
+            <div class="resource-actions">
+              <button class="delete-btn" onclick="deletePdf(${i})">🗑️</button>
+            </div>
+          </div>`;
+      } else {
+        pdfContainer.innerHTML += `
+          <div class="pdf-container">
+            <iframe src="${pdf.data}"></iframe>
+            <div class="resource-actions">
+              <button class="delete-btn" onclick="deletePdf(${i})">🗑️</button>
+            </div>
+          </div>`;
+      }
+    });
+
+    // Renderizar imagens
+    const imageContainer = document.getElementById('images');
+    imageContainer.innerHTML = '';
+    savedImages.forEach((image, i) => {
+      if (image.type === 'link') {
+        imageContainer.innerHTML += `
+          <div class="resource-card">
+            <h4>${image.name}</h4>
+            <div class="image-container">
+              <img src="${image.url}" alt="${image.name}">
+            </div>
+            <div class="resource-actions">
+              <button class="delete-btn" onclick="deleteImage(${i})">🗑️</button>
+            </div>
+          </div>`;
+      } else {
+        imageContainer.innerHTML += `
+          <div class="resource-card">
+            <h4>${image.name}</h4>
+            <div class="image-container">
+              <img src="${image.data}" alt="${image.name}">
+            </div>
+            <div class="resource-actions">
+              <button class="delete-btn" onclick="deleteImage(${i})">🗑️</button>
+            </div>
+          </div>`;
+      }
+    });
+
+    // Renderizar comentários
+    const commentContainer = document.getElementById('comments');
+    commentContainer.innerHTML = '';
+    if (savedComments.length === 0) {
+      commentContainer.innerHTML = '<div class="empty">Nenhum comentário ainda.</div>';
+    } else {
+      savedComments.forEach((text, i) => {
+        const formatted = text.replace(
+          /(https?:\/\/[^\s]+)/g,
+          '<a href="$1" target="_blank">$1</a>'
+        );
+        commentContainer.innerHTML += `
+          <div class="comment">
+            ${formatted}
+            <button class="edit-btn" onclick="editComment(${i})">✏️</button>
+            <button class="delete-btn" onclick="deleteComment(${i})">🗑️</button>
+          </div>`;
+      });
+    }
+
+    // Renderizar páginas incorporadas
+    const pagesContainer = document.getElementById('embedded-pages-container');
+    pagesContainer.innerHTML = '';
+    savedPages.forEach((pageData, i) => {
+      renderEmbeddedPage(pagesContainer, pageData, i, 0);
+    });
+  }
+
+  // ----- PDFs -----
+  function addPdf() {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    const link = document.getElementById('pdfLink').value.trim();
+    if (!link) return;
+
+    const pdfData = {
+      name: 'PDF Externo',
+      url: link,
+      type: 'link'
+    };
+
+    const key = `${currentModule}-pdfs`;
+    const savedPdfs = JSON.parse(localStorage.getItem(key)) || [];
+    savedPdfs.push(pdfData);
+    localStorage.setItem(key, JSON.stringify(savedPdfs));
+    
+    document.getElementById('pdfLink').value = '';
+    updateFooter();
+    closeSection('pdfs-section');
+  }
+
+  function deletePdf(index) {
+    const key = `${currentModule}-pdfs`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    saved.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(saved));
+    updateFooter();
+  }
+
+  // ----- Imagens -----
+  function addImage() {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    const link = document.getElementById('imageLink').value.trim();
+    if (!link) return;
+
+    const imageData = {
+      name: 'Imagem Externa',
+      url: link,
+      type: 'link'
+    };
+
+    const key = `${currentModule}-images`;
+    const savedImages = JSON.parse(localStorage.getItem(key)) || [];
+    savedImages.push(imageData);
+    localStorage.setItem(key, JSON.stringify(savedImages));
+    
+    document.getElementById('imageLink').value = '';
+    updateFooter();
+    closeSection('images-section');
+  }
+
+  function deleteImage(index) {
+    const key = `${currentModule}-images`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    saved.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(saved));
+    updateFooter();
+  }
+
+  // ----- Vídeos -----
+  function addVideo() {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    let link = document.getElementById('videoLink').value.trim();
+    if (!link) return;
+
+    if (link.includes('watch?v=')) link = link.replace('watch?v=', 'embed/');
+    else if (link.includes('youtu.be/')) link = link.replace('youtu.be/', 'www.youtube.com/embed/');
+
+    const key = `${currentModule}-videos`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    saved.push(link);
+    localStorage.setItem(key, JSON.stringify(saved));
+    document.getElementById('videoLink').value = '';
+    updateFooter();
+    closeSection('videos-section');
+  }
+
+  function deleteVideo(index) {
+    const key = `${currentModule}-videos`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    saved.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(saved));
+    updateFooter();
+  }
+
+  // ----- Comentários -----
+  function addComment() {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    const text = document.getElementById('commentText').value.trim();
+    if (!text) return;
+    
+    const key = `${currentModule}-comments`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    
+    if (editingCommentIndex >= 0) {
+      // Editar comentário existente
+      saved[editingCommentIndex] = text;
+      editingCommentIndex = -1;
+    } else {
+      // Adicionar novo comentário
+      saved.push(text);
+    }
+    
+    localStorage.setItem(key, JSON.stringify(saved));
+    document.getElementById('commentText').value = '';
+    updateFooter();
+    closeSection('comments-section');
+  }
+
+  function editComment(index) {
+    const key = `${currentModule}-comments`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    document.getElementById('commentText').value = saved[index];
+    editingCommentIndex = index;
+    document.getElementById('commentText').focus();
+    openSection('comments-section');
+  }
+
+  function deleteComment(index) {
+    const key = `${currentModule}-comments`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
+    saved.splice(index, 1);
+    localStorage.setItem(key, JSON.stringify(saved));
+    updateFooter();
+  }
+
+  // ----- Páginas Incorporadas -----
+  function addEmbeddedPage() {
+    if (!currentModule) return alert('Abra um módulo primeiro!');
+    const pageName = document.getElementById('pageLink').value.trim();
+    if (!pageName) return;
+
+    if (!pageName.endsWith('.html')) {
+      alert('Por favor, insira o nome do arquivo com extensão .html (ex: etre.html)');
+      return;
+    }
+
+    const pageData = {
+      pageName: pageName,
+      title: pageName.replace('.html', '')
+    };
+
+    const savedPages = JSON.parse(localStorage.getItem(`${currentModule}-pages`)) || [];
+    savedPages.push(pageData);
+    localStorage.setItem(`${currentModule}-pages`, JSON.stringify(savedPages));
+    
+    document.getElementById('pageLink').value = '';
+    updateFooter();
+    closeSection('pages-section');
+  }
+
+  function renderEmbeddedPage(container, pageData, index, level) {
+    const pageId = `page-${level}-${index}`;
+    const pageDiv = document.createElement('div');
+    pageDiv.className = `embedded-page-container ${level > 0 ? 'nested-page' : ''}`;
+    pageDiv.id = pageId;
+    
+    const pageUrl = `modules/${pageData.pageName}`;
+    
+    pageDiv.innerHTML = `
+      <div class="embedded-page-header">
+        <div>
+          <button class="collapse-btn" onclick="togglePageCollapse('${pageId}')">−</button>
+          <h3>
+            Página Incorporada: ${pageData.title || pageData.pageName}
+            <span class="local-page-indicator">local</span>
+          </h3>
+        </div>
+        <div class="embedded-page-actions">
+          <button class="fullscreen-btn" onclick="toggleFullscreen('${pageId}')">Tela Cheia</button>
+          <button class="delete-btn" onclick="removeEmbeddedPage(${index}, ${level})">Remover</button>
+        </div>
+      </div>
+      <iframe class="embedded-page" src="${pageUrl}"></iframe>
+      <div class="embedded-page-controls">
+        <button class="action" onclick="reloadEmbeddedPage('${pageId}')">Recarregar</button>
+        <button class="action" onclick="openInNewTab('${pageUrl}')">Abrir em Nova Aba</button>
+      </div>
+    `;
+    
+    container.appendChild(pageDiv);
+  }
+
+  function removeEmbeddedPage(index, level) {
+    if (!currentModule) return;
+    
+    if (level === 0) {
+      const savedPages = JSON.parse(localStorage.getItem(`${currentModule}-pages`)) || [];
+      savedPages.splice(index, 1);
+      localStorage.setItem(`${currentModule}-pages`, JSON.stringify(savedPages));
+    }
+    
+    updateFooter();
+  }
+
+  function reloadEmbeddedPage(pageId) {
+    const iframe = document.querySelector(`#${pageId} .embedded-page`);
+    iframe.src = iframe.src;
+  }
+
+  function openInNewTab(url) {
+    window.open(url, '_blank');
+  }
+
+  function toggleFullscreen(pageId) {
+    const iframe = document.querySelector(`#${pageId} .embedded-page`);
+    if (iframe.requestFullscreen) {
+      iframe.requestFullscreen();
+    } else if (iframe.webkitRequestFullscreen) {
+      iframe.webkitRequestFullscreen();
+    } else if (iframe.msRequestFullscreen) {
+      iframe.msRequestFullscreen();
+    }
+  }
+
+  function togglePageCollapse(pageId) {
+    const page = document.getElementById(pageId);
+    const btn = page.querySelector('.collapse-btn');
+    
+    if (page.classList.contains('collapsed')) {
+      page.classList.remove('collapsed');
+      btn.textContent = '−';
+    } else {
+      page.classList.add('collapsed');
+      btn.textContent = '+';
+    }
+  }
+
+  // Inicialização
+  window.addEventListener('load', () => {
+    initializeUploadAreas();
+    restoreModules();
+    const hash = window.location.hash.replace('#', '');
+    if (hash) loadModule(hash);
+  });
+</script>
+</body>
+</html>
